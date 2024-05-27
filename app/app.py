@@ -5,22 +5,28 @@ from routes import main_bp, admin_bp
 from dotenv import load_dotenv
 import os
 import msal
-from flask_migrate import Migrate  # Import Migrate
+from flask_migrate import Migrate
+
+# Load environment variables from .env file
+load_dotenv()
+
+print("SECRET_KEY:", os.getenv('SECRET_KEY'))
+print("DATABASE_URL:", os.getenv('DATABASE_URL'))
+print("CLIENT_ID:", os.getenv('CLIENT_ID'))
+print("CLIENT_SECRET:", os.getenv('CLIENT_SECRET'))
+print("AUTHORITY:", os.getenv('AUTHORITY'))
+print("REDIRECT_PATH:", os.getenv('REDIRECT_PATH'))
 
 def create_app():
     app = Flask(__name__)
 
-    # Load environment variables from .env file
-    load_dotenv()
-
     app.config.from_object(Config)
 
     db.init_app(app)
-    migrate = Migrate(app, db)  # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
 
     with app.app_context():
         db.create_all()
-        create_default_data()
 
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')

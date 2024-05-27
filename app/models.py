@@ -16,7 +16,7 @@ class Customer(db.Model):
 
 class AccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     role = db.Column(db.String(64), nullable=False)
     first_name = db.Column(db.String(64), nullable=False)
@@ -24,3 +24,5 @@ class AccessRequest(db.Model):
     request_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     approval_timestamp = db.Column(db.DateTime)
     approved = db.Column(db.Boolean, default=False)
+
+    customer = db.relationship('Customer')
