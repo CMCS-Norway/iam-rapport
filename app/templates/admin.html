@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Admin Dashboard</h2>
+    <h3>Pending Requests</h3>
+    <ul>
+        {% for request in requests %}
+            <li>
+                User ID: {{ request.user_id }}, Customer ID: {{ request.customer_id }}, Role: {{ request.role }}
+                <a href="{{ url_for('admin.approve_request', request_id=request.id) }}">Approve</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
