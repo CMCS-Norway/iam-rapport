@@ -1,23 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Flask App</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <title>{% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('main.index') }}">Home</a></li>
-            <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
-            {% if session.get('user') %}
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            {% else %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    <div class="container">
+    <div class="pure-menu pure-menu-horizontal custom-menu-1">
+        {% if session.user %}
+            <a href="{{ url_for('main.index') }}" class="pure-menu-heading pure-menu-link">{{ session.user.given_name }} {{ session.user.family_name }}</a>
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="{{ url_for('main.request_access') }}" class="pure-menu-link">Request Access</a></li>
+                {% if session.is_admin %}
+                    <li class="pure-menu-item"><a href="{{ url_for('admin.admin_dashboard') }}" class="pure-menu-link">Admin</a></li>
+                {% else %}
+                    <li class="pure-menu-item pure-menu-disabled"><a href="#" class="pure-menu-link">Admin</a></li>
+                {% endif %}
+                <li class="pure-menu-item"><a href="{{ url_for('logout') }}" class="pure-menu-link">Logout</a></li>
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="content">
         {% block content %}{% endblock %}
     </div>
+
 </body>
 </html>

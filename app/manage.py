@@ -1,10 +1,10 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from app import create_app
 from models import db
-from dotenv import load_dotenv
 from flask_migrate import Migrate
-
-# Load environment variables from .env file
-load_dotenv()
 
 app = create_app()
 migrate = Migrate(app, db)
@@ -16,4 +16,4 @@ def deploy():
     upgrade()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='localhost', port=5000)

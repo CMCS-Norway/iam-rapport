@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Report{% endblock %}
+
+{% block content %}
+<div class="pure-g">
+    <div class="pure-u-1">
+        <div class="l-box">
+            <h2>Report: {{ report_type|capitalize }} </h2>
+            <h3>Customer Access Report</h3>
+            <table class="pure-table pure-table-bordered">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>User Name</th>
+                        <th>Role</th>
+                        <th>Requested Date</th>
+                        <th>Approval Date</th>
+                        <th>Approved</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in report_data %}
+                    <tr>
+                        <td>{{ row.customer_name }}</td>
+                        <td>{{ row.user_name }}</td>
+                        <td>{{ row.role }}</td>
+                        <td>{{ row.request_timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                        <td>{{ row.approval_timestamp.strftime('%d.%m.%Y %H:%M:%S') if row.approval_timestamp else 'N/A' }}</td>
+                        <td>{{ 'Yes' if row.approved else 'No' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <h3>Internal Access Report</h3>
+            <table class="pure-table pure-table-bordered">
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Access Name</th>
+                        <th>Granted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in internal_access_report_data %}
+                    <tr>
+                        <td>{{ row.user_name }}</td>
+                        <td>{{ row.access_name }}</td>
+                        <td>{{ 'Yes' if row.granted else 'No' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
