@@ -9,19 +9,13 @@
             <h2>Request Internal Access</h2>
             <form class="pure-form pure-form-aligned" method="POST" action="{{ url_for('main.request_internal_access') }}">
                 <fieldset>
-                    <div class="pure-control-group">
-                        <h3>Internal Accesses</h3>
-                        <ul class="pure-menu-list">
-                            {% for access in internal_accesses %}
-                                <li class="pure-menu-item">
-                                    <label class="pure-checkbox">
-                                        <input type="checkbox" id="internal_access_{{ access.id }}" name="internal_accesses" value="{{ access.id }}">
-                                        {{ access.name }}
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    {% for access in internal_accesses %}
+                    <label for="internal_access_{{ access.id }}" class="pure-checkbox">
+                        <input type="checkbox" id="internal_access_{{ access.id }}" name="internal_accesses" value="{{ access.id }}"
+                               {% if access.id in user_internal_access_ids %} checked {% endif %} />
+                        {{ access.name }}
+                    </label>
+                    {% endfor %}
                     <div class="pure-controls">
                         <button type="submit" class="pure-button pure-button-primary">Request Internal Access</button>
                     </div>

@@ -88,10 +88,9 @@ def request_access():
 
 @main_bp.route('/request_internal_access', methods=['GET', 'POST'])
 def request_internal_access():
-    if request.method == 'POST':
-        user_id = session.get('user').get('oid')
+    user_id = session.get('user').get('oid')
 
-        # Get selected internal accesses
+    if request.method == 'POST':
         selected_internal_accesses = request.form.getlist('internal_accesses')
 
         # Check if user exists, if not, create a new user
@@ -104,19 +103,23 @@ def request_internal_access():
             db.session.commit()
 
         # Handle internal accesses
+        existing_accesses = {access.internal_access_id for access in UserInternalAccess.query.filter_by(user_id=user_id).all()}
         for access_id in selected_internal_accesses:
-            user_internal_access = UserInternalAccess(
-                user_id=user_id, 
-                internal_access_id=int(access_id), 
-                granted=True
-            )
-            db.session.add(user_internal_access)
+            access_id = int(access_id)
+            if access_id not in existing_accesses:
+                user_internal_access = UserInternalAccess(
+                    user_id=user_id, 
+                    internal_access_id=access_id, 
+                    granted=True
+                )
+                db.session.add(user_internal_access)
         db.session.commit()
 
         return redirect(url_for('main.index'))
 
     internal_accesses = InternalAccess.query.all()
-    return render_template('request_internal_access.html', internal_accesses=internal_accesses)
+    user_internal_access_ids = {access.internal_access_id for access in UserInternalAccess.query.filter_by(user_id=user_id).all()}
+    return render_template('request_internal_access.html', internal_accesses=internal_accesses, user_internal_access_ids=user_internal_access_ids)
 
 @admin_bp.route('/')
 def admin_dashboard():

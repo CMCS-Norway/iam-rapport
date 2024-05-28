@@ -12,7 +12,8 @@
         {% if session.user %}
             <a href="{{ url_for('main.index') }}" class="pure-menu-heading pure-menu-link">{{ session.user.given_name }} {{ session.user.family_name }}</a>
             <ul class="pure-menu-list">
-                <li class="pure-menu-item"><a href="{{ url_for('main.request_access') }}" class="pure-menu-link">Request Access</a></li>
+                <li class="pure-menu-item"><a href="{{ url_for('main.request_access') }}" class="pure-menu-link">Request Customer Access</a></li>
+                <li class="pure-menu-item"><a href="{{ url_for('main.request_internal_access') }}" class="pure-menu-link">Request Internal Access</a></li>
                 {% if session.is_admin %}
                     <li class="pure-menu-item"><a href="{{ url_for('admin.admin_dashboard') }}" class="pure-menu-link">Admin</a></li>
                 {% else %}
