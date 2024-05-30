@@ -28,60 +28,69 @@ def index():
         return render_template('dashboard.html', pending_requests=pending_requests, grouped_approved_requests=grouped_approved_requests, internal_access=internal_access)
     else:
         return render_template('index.html')
-
 @main_bp.route('/request_access', methods=['GET', 'POST'])
 def request_access():
     if request.method == 'POST':
         user_id = session.get('user').get('oid')
-        email = session.get('user').get('preferred_username')
-        name = session.get('user').get('name')
-        customer_id = int(request.form['customer_id'])  # Ensure customer_id is an integer
+        customer_id = int(request.form['customer_id'])
         role = request.form['role']
-        
-        # Get first and last name from session
         first_name = session.get('user').get('given_name')
         last_name = session.get('user').get('family_name')
+        approver_username = session.get('user').get('preferred_username')
+        approver_first_name = session.get('user').get('given_name')
+        approver_last_name = session.get('user').get('family_name')
 
-        # Get selected systems
-        selected_systems = request.form.getlist('systems')
+        print(f"User ID: {user_id}, Customer ID: {customer_id}, Role: {role}, Approver: {approver_username}")
 
         # Check if user exists, if not, create a new user
         user = User.query.get(user_id)
         if not user:
+            name = session.get('user').get('name')
+            email = session.get('user').get('preferred_username')
             user = User(id=user_id, name=name, email=email)
             db.session.add(user)
             db.session.commit()
+            print("New user created")
 
         # Verify customer exists before creating the access request
         customer = Customer.query.get(customer_id)
         if customer:
-            approver_username = session['user']['preferred_username']
             existing_request = AccessRequest.query.filter_by(user_id=user_id, customer_id=customer_id).first()
             if existing_request:
-                # Update existing role
-                existing_request.role = role
-                existing_request.approval_timestamp = datetime.utcnow()
-                existing_request.approver_username = approver_username
+                # If the role is changed, reset approval status and timestamp
+                if existing_request.role != role:
+                    existing_request.role = role
+                    existing_request.first_name = first_name
+                    existing_request.last_name = last_name
+                    existing_request.request_timestamp = datetime.utcnow()
+                    existing_request.approved = False
+                    existing_request.approval_timestamp = None
+                    existing_request.approver_username = None
+                    existing_request.approver_first_name = None
+                    existing_request.approver_last_name = None
+                    print("Role changed and approval reset")
+                else:
+                    print("Role not changed, no reset needed")
             else:
-                # Create new access request
-                for system in selected_systems:
-                    access_request = AccessRequest(
-                        user_id=user_id, 
-                        customer_id=customer_id, 
-                        role=role, 
-                        first_name=first_name, 
-                        last_name=last_name,
-                        request_timestamp=datetime.utcnow(),
-                        approver_username=approver_username
-                    )
-                    db.session.add(access_request)
+                access_request = AccessRequest(
+                    user_id=user_id,
+                    customer_id=customer_id,
+                    role=role,
+                    first_name=first_name,
+                    last_name=last_name,
+                    request_timestamp=datetime.utcnow(),
+                    approver_username=approver_username,
+                    approver_first_name=approver_first_name,
+                    approver_last_name=approver_last_name
+                )
+                db.session.add(access_request)
+                print("New access request created")
             db.session.commit()
-
             return redirect(url_for('main.index'))
         else:
-            # Handle the error appropriately (e.g., flash a message or render an error page)
-            return redirect(url_for('main.index'))  # Simplified for brevity
-    
+            print("Customer not found")
+            return redirect(url_for('main.index'))
+
     customers = Customer.query.all()
     roles = Role.query.all()
     return render_template('request_access.html', customers=customers, roles=roles)
@@ -92,6 +101,9 @@ def request_internal_access():
 
     if request.method == 'POST':
         selected_internal_accesses = request.form.getlist('internal_accesses')
+        approver_username = session['user']['preferred_username']
+        approver_first_name = session.get('user').get('given_name')
+        approver_last_name = session.get('user').get('family_name')
 
         # Check if user exists, if not, create a new user
         user = User.query.get(user_id)
@@ -103,16 +115,34 @@ def request_internal_access():
             db.session.commit()
 
         # Handle internal accesses
-        existing_accesses = {access.internal_access_id for access in UserInternalAccess.query.filter_by(user_id=user_id).all()}
         for access_id in selected_internal_accesses:
-            access_id = int(access_id)
-            if access_id not in existing_accesses:
-                user_internal_access = UserInternalAccess(
-                    user_id=user_id, 
-                    internal_access_id=access_id, 
-                    granted=True
+            internal_access = InternalAccess.query.get(access_id)
+            if not internal_access:
+                continue
+            
+            existing_request = AccessRequest.query.filter_by(user_id=user_id, customer_id=0, role=internal_access.name, is_internal_access=True).first()
+            if existing_request:
+                if not existing_request.approved:
+                    existing_request.request_timestamp = datetime.utcnow()
+                    existing_request.approver_username = None
+                    existing_request.approver_first_name = None
+                    existing_request.approver_last_name = None
+                    existing_request.approved = False
+                    existing_request.approval_timestamp = None
+            else:
+                access_request = AccessRequest(
+                    user_id=user_id,
+                    customer_id=0,  # Using customer_id as 0 for internal access
+                    role=internal_access.name,
+                    first_name=session['user'].get('given_name'),
+                    last_name=session['user'].get('family_name'),
+                    request_timestamp=datetime.utcnow(),
+                    approver_username=approver_username,
+                    approver_first_name=approver_first_name,
+                    approver_last_name=approver_last_name,
+                    is_internal_access=True
                 )
-                db.session.add(user_internal_access)
+                db.session.add(access_request)
         db.session.commit()
 
         return redirect(url_for('main.index'))
@@ -125,8 +155,9 @@ def request_internal_access():
 def admin_dashboard():
     if not session.get('is_admin'):
         return abort(403)
-    requests = AccessRequest.query.filter_by(approved=False).all()
-    return render_template('admin.html', requests=requests)
+    requests = AccessRequest.query.filter_by(approved=False, is_internal_access=False).all()
+    internal_requests = AccessRequest.query.filter_by(approved=False, is_internal_access=True).all()
+    return render_template('admin_dashboard.html', requests=requests, internal_requests=internal_requests)
 
 @admin_bp.route('/approve/<int:request_id>')
 def approve_request(request_id):
@@ -135,6 +166,9 @@ def approve_request(request_id):
     access_request = AccessRequest.query.get(request_id)
     access_request.approved = True
     access_request.approval_timestamp = datetime.utcnow()
+    access_request.approver_username = session.get('user')['preferred_username']
+    access_request.approver_first_name = session.get('user')['given_name']
+    access_request.approver_last_name = session.get('user')['family_name']
     db.session.commit()
     return redirect(url_for('admin.admin_dashboard'))
 
@@ -155,7 +189,9 @@ def generate_report():
             AccessRequest.role,
             AccessRequest.request_timestamp,
             AccessRequest.approval_timestamp,
-            AccessRequest.approved
+            AccessRequest.approved,
+            AccessRequest.approver_first_name,
+            AccessRequest.approver_last_name
         ).join(Customer, AccessRequest.customer_id == Customer.id)\
          .join(User, AccessRequest.user_id == User.id)
         

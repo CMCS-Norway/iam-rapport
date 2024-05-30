@@ -9,7 +9,6 @@
             <h2>Request Access</h2>
             <form class="pure-form pure-form-aligned" method="POST" action="{{ url_for('main.request_access') }}">
                 <fieldset>
-                    
                         <label for="customer_id">Customer</label>
                         <select id="customer_id" name="customer_id" required>
                             <option value="" disabled selected>Select a customer</option>
@@ -17,8 +16,6 @@
                                 <option value="{{ customer.id }}">{{ customer.name }}</option>
                             {% endfor %}
                         </select>
-
-                    
                         <label for="role">Role</label>
                         <select id="role" name="role" required>
                             <option value="" disabled selected>Select a role</option>
@@ -26,27 +23,12 @@
                                 <option value="{{ role.name }}">{{ role.name }}</option>
                             {% endfor %}
                         </select>
-
-                    
-                        <h3>Internal Accesses</h3>
-                        <ul class="pure-menu-list">
-                            {% for access in internal_accesses %}
-                                <li class="pure-menu-item">
-                                    <label class="pure-checkbox">
-                                        <input type="checkbox" id="internal_access_{{ access.id }}" name="internal_accesses" value="{{ access.id }}">
-                                        {{ access.name }}
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-
-  
+                    <div class="pure-controls">
                         <button type="submit" class="pure-button pure-button-primary">Request Access</button>
-  
+                    </div>
                 </fieldset>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
-```

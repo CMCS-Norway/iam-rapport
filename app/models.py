@@ -20,10 +20,15 @@ class AccessRequest(db.Model):
     user_id = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     role = db.Column(db.String(50), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
     request_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     approval_timestamp = db.Column(db.DateTime)
     approved = db.Column(db.Boolean, default=False)
     approver_username = db.Column(db.String(50))
+    approver_first_name = db.Column(db.String(100))
+    approver_last_name = db.Column(db.String(100)) 
+    is_internal_access = db.Column(db.Boolean, default=False) 
 
     @classmethod
     def change_role(cls, user_id, customer_id, new_role, approver_username):
@@ -41,7 +46,7 @@ class AccessRequest(db.Model):
                 approver_username=approver_username
             )
             db.session.add(new_request)
-        db.session.commit()
+        db.session.commit()    
 
 class InternalAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,4 +61,4 @@ class UserInternalAccess(db.Model):
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)    
+    name = db.Column(db.String(100), unique=True, nullable=False)

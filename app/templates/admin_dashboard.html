@@ -42,6 +42,32 @@
             {% else %}
                 <p>No pending access requests.</p>
             {% endif %}
+
+            <h2>Pending Internal Access Reviews</h2>
+            {% if internal_requests %}
+                <table class="pure-table pure-table-bordered">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Internal Access</th>
+                            <th>Requested Date</th>
+                            <th>Approve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% for request in internal_requests %}
+                        <tr>
+                            <td>{{ request.first_name }} {{ request.last_name }}</td>
+                            <td>{{ request.role }}</td>
+                            <td>{{ request.request_timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                            <td><a href="{{ url_for('admin.approve_request', request_id=request.id) }}" class="pure-button pure-button-primary">Approve</a></td>
+                        </tr>                        
+                {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No pending internal access requests.</p>
+            {% endif %}
         </div>
     </div>
 </div>

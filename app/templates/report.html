@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="pure-g">
-    <div class="pure-u-1">
+    <div class="pure-u-1-2">
         <div class="l-box">
             <h2>Report: {{ report_type|capitalize }} </h2>
             <h3>Customer Access Report</h3>
@@ -17,6 +17,7 @@
                         <th>Requested Date</th>
                         <th>Approval Date</th>
                         <th>Approved</th>
+                        <th>Approver Name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,7 @@
                         <td>{{ row.request_timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
                         <td>{{ row.approval_timestamp.strftime('%d.%m.%Y %H:%M:%S') if row.approval_timestamp else 'N/A' }}</td>
                         <td>{{ 'Yes' if row.approved else 'No' }}</td>
+                        <td>{{ row.approver_first_name }} {{ row.approver_last_name }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -54,3 +56,5 @@
         </div>
     </div>
 </div>
+
+{% endblock %}
