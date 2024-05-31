@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 .DS_Store
 docker/
-app/flask_session/
+app/flask_session/*
