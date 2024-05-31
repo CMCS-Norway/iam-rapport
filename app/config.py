@@ -11,4 +11,4 @@ class Config:
     SCOPE = ["User.Read"]
     SESSION_TYPE = "filesystem"
     REQUIRED_GROUPS = os.getenv('REQUIRED_GROUPS').split(',')
-    ADMIN_GROUP_ID = os.getenv('ADMIN_GROUP_ID')  # Add this line
+    ADMIN_GROUP_ID = os.getenv('ADMIN_GROUP_ID')
