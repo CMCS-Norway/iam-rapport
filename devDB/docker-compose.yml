@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=access_review
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db.py:/docker-entrypoint-initdb.d/init_db.py
+
+  init:
+    image: python:3.9
+    environment:
+      - POSTGRES_DB=access_review
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./init_db.py:/init_db.py
+      - ./requirements.txt:/requirements.txt
+    depends_on:
+      - db
+    command: bash -c "pip install -r /requirements.txt && python /init_db.py"
+
+volumes:
+  postgres_data:
