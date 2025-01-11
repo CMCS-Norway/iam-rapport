@@ -44,7 +44,7 @@ try:
     cursor.close()
     connection.close()
 
-    # Create the access_review database if it doesn't exist
+    # Reconnect to the server to create the database
     connection = psycopg2.connect(
         dbname='postgres',  # Connect to the default database first
         user=USER,
@@ -52,6 +52,9 @@ try:
         host=HOST,
         port=PORT
     )
+
+    # Set autocommit mode to True
+    connection.autocommit = True
 
     cursor = connection.cursor()
 
